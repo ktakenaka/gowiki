@@ -4,7 +4,7 @@
     <title>gowiki</title>
 </head>
 <style>
-    body {background-color: black;}
+    body {background-color: green;}
     h1 {color: blue;}
 </style>
 <body>
@@ -12,6 +12,6 @@
 
 <p>[<a href="/edit/{{.Title}}">edit</a>]</p>
 
-<div>{{printf "%s" .Body}}</div>
+<div>{{.DisplayBody}}</div>
 </body>
 </html>

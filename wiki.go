@@ -5,15 +5,17 @@ import (
 	"log"
 	"net/http"
 	"regexp"
-	"text/template"
+	"html/template"
 )
 
 var validPath = regexp.MustCompile("^/(edit|save|view)/([a-zA-Z0-9]+)$")
 var templates = template.Must(template.ParseFiles("tmpl/edit.html", "tmpl/view.html"))
+var linkRegexp = regexp.MustCompile("\\[([a-zA-Z0-9]+)\\]")
 
 type Page struct {
 	Title string
 	Body  []byte
+	DisplayBody template.HTML
 }
 
 func buildFileName(title string) (string){
@@ -60,6 +62,12 @@ func viewHandler(w http.ResponseWriter, r *http.Request, title string) {
 		http.Redirect(w, r, "/edit/"+title, http.StatusFound)
 		return
 	}
+
+	escapedBody := []byte(template.HTMLEscapeString(string(p.Body)))
+	p.DisplayBody = template.HTML(linkRegexp.ReplaceAllFunc(escapedBody, func(str []byte) []byte {
+		matched := linkRegexp.FindStringSubmatch(string(str))
+		out := []byte("<a href=\"/view/"+matched[1]+"\">"+matched[1]+"</a>")
+		return out}))
 	renderTemplate(w, "view", p)
 }
 
